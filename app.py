@@ -44,7 +44,7 @@ with st.sidebar:# This will be used in the tape section to filter trades
         f"Min {asset} Block Size", 
         min_value=0.1, 
         step=0.5,
-        key="block_threshold" 
+        key="block_threshold")
 
 # Allow user to choose how many BPS constitutes a "Signal"
 edge_threshold = st.sidebar.slider(
