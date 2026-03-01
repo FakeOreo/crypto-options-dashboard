@@ -386,7 +386,7 @@ if not trade_flow.empty:
     display_df = display_df.drop(columns=[c for c in cols_to_drop if c in display_df.columns])
 
 
-    st.dataframe(display_df.style.apply(highlight_blocks, axis=1), use_container_width=True, height=300)
+    st.dataframe(display_df.sort_values(by='timestamp', ascending=False), use_container_width=True, height=300)
 else:
     st.info(f"No trades found ≥ {min_block_size} {asset} in the last 100 trades.")
 
