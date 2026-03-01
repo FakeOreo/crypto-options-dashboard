@@ -35,8 +35,17 @@ type_code = "C" if option_type == "Calls" else "P"
 if st.sidebar.button("🔄 Refresh"):
     st.cache_data.clear()  # Clears cache to ensure we get live data from APIs
     st.rerun()             # Forces the script to restart immediately
-
 st.sidebar.subheader("SABR Sensitivity")
+
+with st.sidebar:# This will be used in the tape section to filter trades
+    st.divider()
+    st.subheader("Tape Settings")
+    st.number_input(
+        f"Min {asset} Block Size", 
+        min_value=0.1, 
+        step=0.5,
+        key="block_threshold" 
+
 # Allow user to choose how many BPS constitutes a "Signal"
 edge_threshold = st.sidebar.slider(
     "Signal Threshold (BPS)", 
@@ -365,10 +374,21 @@ st.divider()
 st.subheader(f"⚡ Live {asset} Tape (Recent Blocks & Large Trades)")
 
 if not trade_flow.empty:
-    def highlight_blocks(row):
-        return ['background-color: #1d2129' if row.is_block else '' for _ in row]
+    min_block_size = st.number_input(
+        f"Block Threshold ({asset})", 
+        min_value=0.0, 
+        value=5.0, 
+        step=0.5,
+        key="block_threshold_input"
+    )
+    display_df = trade_flow[trade_flow['amount'] >= min_block_size].copy()
+    cols_to_drop = ['is_call', 'is_block']
+    display_df = display_df.drop(columns=[c for c in cols_to_drop if c in display_df.columns])
 
-    st.dataframe(trade_flow.style.apply(highlight_blocks, axis=1), use_container_width=True, height=300)
+
+    st.dataframe(display_df.style.apply(highlight_blocks, axis=1), use_container_width=True, height=300)
+    else:
+    st.info(f"No trades found ≥ {min_block_size} {asset} in the last 100 trades.")
 else:
     st.info("Waiting for new trade data...")
 
