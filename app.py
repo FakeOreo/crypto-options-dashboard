@@ -27,6 +27,9 @@ local_tz = pytz.timezone('Singapore')
 now_local = datetime.now(local_tz)
 last_updated = now_local.strftime("%Y-%m-%d %H:%M:%S")
 
+def get_centered_config(df):
+    return {col: st.column_config.Column(alignment="center") for col in df.columns}
+
 # --- 2. SIDEBAR CONTROLS ---
 st.sidebar.write(f"⏱️ **Last Updated:** {last_updated} (SGT)")
 asset = st.sidebar.selectbox("Asset", ["BTC", "ETH"])
@@ -36,15 +39,6 @@ if st.sidebar.button("🔄 Refresh"):
     st.cache_data.clear()  # Clears cache to ensure we get live data from APIs
     st.rerun()             # Forces the script to restart immediately
 st.sidebar.subheader("SABR Sensitivity")
-
-with st.sidebar:# This will be used in the tape section to filter trades
-    st.divider()
-    st.subheader("Tape Settings")
-    st.number_input(
-        f"Min {asset} Block Size", 
-        min_value=0.1, 
-        step=0.5,
-        key="block_threshold")
 
 # Allow user to choose how many BPS constitutes a "Signal"
 edge_threshold = st.sidebar.slider(
@@ -89,6 +83,15 @@ if not processed_options.empty:
 else:
     selected_expiry = None
 
+with st.sidebar:# This will be used in the tape section to filter trades
+    st.divider()
+    st.subheader("Tape Settings")
+    st.number_input(
+        f"Min {asset} Block Size", 
+        min_value=0.1, 
+        step=0.5,
+        key="block_threshold")
+    
 # --- 5. TOP SUMMARY BAR ---
 price_col1, price_col2, price_col3, price_col4 = st.columns(4)
 price_col1.metric(f"{asset} Spot", f"${current_spot:,.2f}")
@@ -372,23 +375,19 @@ with col_c2:
 # --- 12. LIVE OPTIONS FLOW TAPE ---
 st.divider()
 st.subheader(f"⚡ Live {asset} Tape (Recent Blocks & Large Trades)")
+trade_flow = dp.get_trade_flows(asset)
 
 if not trade_flow.empty:
-    min_block_size = st.number_input(
-        f"Block Threshold ({asset})", 
-        min_value=0.0, 
-        value=5.0, 
-        step=0.5,
-        key="block_threshold_input"
-    )
-    display_df = trade_flow[trade_flow['amount'] >= min_block_size].copy()
-    cols_to_drop = ['is_call', 'is_block']
-    display_df = display_df.drop(columns=[c for c in cols_to_drop if c in display_df.columns])
+    threshold = st.session_state.get("block_threshold", 5.0)
 
+    display_df = trade_flow[trade_flow['amount'] >= threshold].copy()
 
-    st.dataframe(display_df.sort_values('timestamp', ascending=False), use_container_width=True, height=300)
+    if not display_df.empty:
+        st.dataframe(
+        display_df.sort_values('time', ascending=False),
+        use_container_width=True, height=300)
 else:
-    st.info(f"No trades found ≥ {min_block_size} {asset} in the last 100 trades.")
+    st.info(f"No trades found ≥ {threshold} {asset} in the last 100 trades.")
 
 
 # --- 13. 3D VOLATILITY MODEL ---

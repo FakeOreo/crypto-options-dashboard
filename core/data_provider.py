@@ -40,6 +40,24 @@ def get_market_vols():
             vols[currency] = 0
     return vols
 
+def get_trade_flows(asset):
+    """
+    Fetches recent trades and explicitly removes the unwanted 
+    'is_call' and 'is_block' columns.
+    """
+    # 1. Fetch the raw data from your existing flow module
+    from components import flow_monitor as flow
+    df = flow.fetch_recent_trades(asset)
+    
+    if df is not None and not df.empty:
+        # 2. List the columns you actually want to keep
+        keep_cols = ['time', 'instrument_name', 'direction', 'price', 'amount']
+        
+        # 3. Return only those columns (ignores is_call, is_block, etc.)
+        return df[[col for col in keep_cols if col in df.columns]]
+    
+    return pd.DataFrame()
+
 @st.cache_data(ttl=60)
 def get_coingecko_spot():
     """Fetches live BTC and ETH prices from CoinGecko free API"""
