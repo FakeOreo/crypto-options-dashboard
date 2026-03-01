@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import datetime
+import pytz
 from core import data_provider as dp, analytics as an, rel_val as rv
 from components import visualizations as vis, scanner as scan, flow_monitor as flow
 from styles import apply_custom_styles
@@ -22,10 +23,12 @@ st.title("Crypto Options Command Center")
 
 #Refresh timer (every 60 seconds)
 count = st_autorefresh(interval=60000, limit=None, key="datarefresh")
-last_updated = datetime.datetime.now().strftime("%H:%M:%S")
+local_tz = pytz.timezone('Singapore')
+now_local = datetime.now(local_tz)
+last_updated = now_local.strftime("%Y-%m-%d %H:%M:%S")
 
 # --- 2. SIDEBAR CONTROLS ---
-st.sidebar.write(f"⏱️ **Last Updated:** {last_updated}")
+st.sidebar.write(f"⏱️ **Last Updated:** {last_updated} (SGT)")
 asset = st.sidebar.selectbox("Asset", ["BTC", "ETH"])
 option_type = st.sidebar.radio("Option Type", ["Calls", "Puts"])
 type_code = "C" if option_type == "Calls" else "P"
