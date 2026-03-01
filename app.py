@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import datetime
+from datetime import datetime
 import pytz
 from core import data_provider as dp, analytics as an, rel_val as rv
 from components import visualizations as vis, scanner as scan, flow_monitor as flow
