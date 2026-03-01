@@ -387,10 +387,8 @@ if not trade_flow.empty:
 
 
     st.dataframe(display_df.style.apply(highlight_blocks, axis=1), use_container_width=True, height=300)
-    else:
-    st.info(f"No trades found ≥ {min_block_size} {asset} in the last 100 trades.")
 else:
-    st.info("Waiting for new trade data...")
+    st.info(f"No trades found ≥ {min_block_size} {asset} in the last 100 trades.")
 
 
 # --- 13. 3D VOLATILITY MODEL ---
