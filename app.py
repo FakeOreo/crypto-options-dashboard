@@ -74,7 +74,7 @@ else:
 if not processed_options.empty:
     available_expiries = sorted(
     processed_options['expiry'].unique(), 
-    key=lambda x: datetime.datetime.strptime(x, '%d%b%y')
+    key=lambda x: datetime.strptime(x, '%d%b%y')
 )
     selected_expiry = st.sidebar.selectbox("Select Expiry for SABR Fit", available_expiries)
 else:
